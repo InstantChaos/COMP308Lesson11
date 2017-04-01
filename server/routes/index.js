@@ -6,12 +6,12 @@ let router = express.Router();
 let indexController = require('../controllers/index');
 
 /* GET home page. wildcard */
-router.get('/', (req, res, next) => {
+router.get('/', (req, res) => {
   indexController.DisplayHome(req, res);
 });
 
 /* GET contact page. */
-router.get('/contact', (req, res, next) => {
+router.get('/contact', (req, res) => {
   indexController.DisplayContact(req, res);
 });
 

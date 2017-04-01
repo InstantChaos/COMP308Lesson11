@@ -28,8 +28,8 @@ export class EditComponent{
         let gameId = '58964b1c4108ad0d0657f811'; // testing
         this._gamesService.read(gameId).subscribe(game => {
             this.game = game;
-          },
-            error => this._router.navigate(['/games']));
+          });
+          //, error => this._router.navigate(['/games']));
         //});
       }
 

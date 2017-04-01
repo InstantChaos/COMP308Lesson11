@@ -6,7 +6,7 @@ let router = express.Router();
 let usersController = require('../controllers/users');
 
 // GET /login - render the login view
-router.get('/login', (req, res, next)=>{
+router.get('/login', (req, res)=>{
   usersController.DisplayLogin(req, res);
   // POST /login - process the login attempt
 }).post('/login', (req, res, next) => {
@@ -14,7 +14,7 @@ router.get('/login', (req, res, next)=>{
 });
 
 // GET /register - render the registration view
-router.get('/register', (req, res, next)=>{
+router.get('/register', (req, res)=>{
    usersController.DisplayRegistration(req, res);
 }).post('/register', (req, res, next)=>{
   // POST / register - process the registration submission
@@ -22,7 +22,7 @@ router.get('/register', (req, res, next)=>{
 });
 
 // GET /logout - process the logout request
-router.get('/logout', (req, res, next)=>{
+router.get('/logout', (req, res)=>{
   usersController.ProcessLogout(req, res);
 });
 

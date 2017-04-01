@@ -6,23 +6,19 @@ let game = require('../models/games');
 // required for firebase
 let firebase = require('../config/firebase');
 let firebaseDB = firebase.games;
-let firebaseAdmin = firebase.admin;
+//let firebaseAdmin = firebase.admin;
 let firebaseAuth = firebase.auth;
 
 // Read and display the Game List
 module.exports.ReadGameList = (req, res) => {
   // find all games in the games collection
-  game.find( (err, games) => {
-    if (err) {
-      return console.error(err);
-    }
-    else {
-      res.render('games/index', {
+
+firebaseDB.orderByKey().once("value", (snapshot)=>{
+     res.render('games/index', {
         title: 'Games',
-        games: games,
+        games: snapshot.val(),
         displayName: firebaseAuth.currentUser ? firebaseAuth.currentUser.displayName : ''
       });
-    }
   });
 }
 
@@ -37,35 +33,48 @@ module.exports.DisplayAdd = (req, res) => {
 
 // Create a new game and insert it into the db
 module.exports.CreateGame = (req, res) => {
-  let newGame = game({
+  let newGame = {
       "name": req.body.name,
       "cost": req.body.cost,
       "rating": req.body.rating
-    });
+    };
 
-    game.create(newGame, (err, game) => {
-      if(err) {
-        console.log(err);
-        res.end(err);
-      } else {
-        res.redirect('/games');
-      }
+    let newchild = null;
+
+    firebaseDB.once("value", (snapshot) => {
+      // read the number of children of the games list
+      newchild = snapshot.numChildren();
+
+      // set the value of the new child
+      firebaseDB.child(newchild).set(newGame, (err) =>{
+        if(err) {
+          console.log(err);
+          res.end(err);
+        }
+        else {
+          res.redirect('/games');
+        }
+      });
     });
 }
 
 // Displays the Details page to Update a Game
 // find the game by id and populate the form
 module.exports.DisplayEdit = (req, res) => {
-  try {
-      // get a reference to the id from the url
-      let id = mongoose.Types.ObjectId.createFromHexString(req.params.id);
 
-        // find one game by its id
-      game.findById(id, (err, games) => {
+  try {
+      // get the game id from the url
+      let id = req.params.id;
+
+      firebaseDB.child(id).once("value", (snapshot)=>{
+        res.status(200).json(snapshot.val());
+      },
+      (err) => {
         if(err) {
           console.log(err);
-          res.end(error);
-        } else {
+          res.end(err);
+        }
+        else {
           // show the game details view
           res.render('games/details', {
               title: 'Game Details',
@@ -85,19 +94,18 @@ module.exports.UpdateGame = (req, res) => {
   // get a reference to the id from the url
     let id = req.params.id;
 
-     let updatedGame = game({
-       "_id": id,
+     let updatedGame = {
       "name": req.body.name,
       "cost": req.body.cost,
       "rating": req.body.rating
-    });
+    };
 
-    game.update({_id: id}, updatedGame, (err) => {
+    firebaseDB.child(id).update(updatedGame, (err) => {
       if(err) {
         console.log(err);
         res.end(err);
-      } else {
-        // refresh the game List
+      }
+      else {
         res.redirect('/games');
       }
     });
